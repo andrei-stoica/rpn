@@ -1,5 +1,6 @@
 use std::io::{self, Write};
 
+mod interpreter;
 mod parser;
 mod tokenizer;
 
