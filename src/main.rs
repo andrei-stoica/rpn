@@ -9,8 +9,8 @@ fn main() {
     println!("Reverse polish notation calculator");
     print!("$ ");
     let _ = io::stdout().flush();
-    while let Ok(n) = io::stdin().read_line(&mut input) {
-        println!("{:#?}", tokenizer::tokenize(input.clone()));
+    while let Ok(_n) = io::stdin().read_line(&mut input) {
+        println!("{:#?}", parser::parse(tokenizer::tokenize(input.clone())));
         input.clear();
         print!("$ ");
         let _ = io::stdout().flush();

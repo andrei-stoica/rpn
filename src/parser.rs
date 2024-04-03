@@ -1,20 +1,20 @@
 use crate::tokenizer::{Op, Token};
 
 #[derive(Debug, PartialEq)]
-enum Expr {
+pub enum Expr {
     Calc(Op, Box<Expr>, Box<Expr>),
     Literal(Token),
 }
 
 #[derive(Debug, PartialEq)]
-enum ParserError {
+pub enum ParserError {
     UnrecognizedToken,
     OperatorMissingOpperand(Op),
     UnbalancedEquation,
     NoExpression,
 }
 
-fn parse(tokens: Vec<Token>) -> Result<Expr, ParserError> {
+pub fn parse(tokens: Vec<Token>) -> Result<Expr, ParserError> {
     let mut stack: Vec<Expr> = vec![];
     for token in tokens.into_iter() {
         match token {

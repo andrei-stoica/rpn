@@ -70,7 +70,6 @@ pub fn tokenize(text: String) -> Vec<Token> {
 }
 
 fn parse(chars: &Vec<char>) -> Token {
-    println!("{:#?}", chars);
     if chars.contains(&'.') {
         Token::Float(String::from_iter(chars).parse().unwrap())
     } else {
