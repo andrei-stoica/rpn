@@ -5,8 +5,9 @@ RPN is just backwards lisp without the brackets or state. A good reintroduction
 before I try a more complicated language.
 
 ## Objectives
- - [ ] learn some Rust 
- - [ ] remember a few things about compilers (Hopefully)
+ - [x] learn some more Rust 
+ - [x] remember a few things about compilers (Hopefully)
  - [x] build a small tokenizer
  - [x] build a small parser
- - [ ] build a small interpreter
+ - [x] build a small interpreter
+
