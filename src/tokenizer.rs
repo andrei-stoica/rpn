@@ -1,4 +1,4 @@
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone, Copy)]
 pub enum Token {
     Int(usize),
     Float(f32),
@@ -6,7 +6,7 @@ pub enum Token {
     Unrecognized,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone, Copy)]
 pub enum Op {
     Add,
     Sub,
