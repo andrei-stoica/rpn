@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use crate::parser::Expr;
 use crate::tokenizer::{Op, Token};
 
@@ -11,6 +13,7 @@ pub enum Number {
     Float(f32),
     Int(i32),
 }
+
 impl Number {
     pub fn add(&self, other: &Number) -> Number {
         match self {
@@ -61,6 +64,15 @@ impl Number {
                 Number::Int(y) => Number::Float(x * *y as f32),
                 Number::Float(y) => Number::Float(x * y),
             },
+        }
+    }
+}
+
+impl Display for Number {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Number::Float(n) => write!(f, "{}", n),
+            Number::Int(n) => write!(f, "{}", n),
         }
     }
 }
