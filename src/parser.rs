@@ -55,6 +55,28 @@ mod test {
             parse(vec![Token::Int(1), Token::Int(2)]),
             Err(ParserError::UnbalancedEquation)
         );
+        assert_eq!(
+            parse(vec![Token::Int(1), Token::Operation(Op::Add)]),
+            Err(ParserError::OperatorMissingOpperand(Op::Add))
+        );
+        assert_eq!(
+            parse(vec![
+                Token::Int(1),
+                Token::Int(2),
+                Token::Operation(Op::Add),
+                Token::Operation(Op::Sub),
+            ]),
+            Err(ParserError::OperatorMissingOpperand(Op::Sub))
+        );
+        assert_eq!(
+            parse(vec![
+                Token::Int(1),
+                Token::Int(2),
+                Token::Operation(Op::Add),
+                Token::Float(2.0),
+            ]),
+            Err(ParserError::UnbalancedEquation)
+        );
 
         assert_eq!(
             parse(vec![
