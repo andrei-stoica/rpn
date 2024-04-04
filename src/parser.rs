@@ -91,6 +91,32 @@ mod test {
                 Box::new(Expr::Literal(Token::Int(2)))
             )
         );
+        assert_eq!(
+            parse(vec![
+                Token::Int(-1),
+                Token::Int(2),
+                Token::Operation(Op::Add)
+            ])
+            .unwrap(),
+            Expr::Calc(
+                Op::Add,
+                Box::new(Expr::Literal(Token::Int(-1))),
+                Box::new(Expr::Literal(Token::Int(2)))
+            )
+        );
+        assert_eq!(
+            parse(vec![
+                Token::Int(-1),
+                Token::Int(-2),
+                Token::Operation(Op::Add)
+            ])
+            .unwrap(),
+            Expr::Calc(
+                Op::Add,
+                Box::new(Expr::Literal(Token::Int(-1))),
+                Box::new(Expr::Literal(Token::Int(-2)))
+            )
+        );
 
         assert_eq!(
             parse(vec![

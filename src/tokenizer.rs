@@ -1,9 +1,17 @@
+use std::num::{ParseFloatError, ParseIntError};
+
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub enum Token {
     Int(i32),
     Float(f32),
     Operation(Op),
     Unrecognized,
+}
+
+#[derive(Debug)]
+pub enum TokenParseError {
+    ParseFloatError,
+    IntParseError,
 }
 
 #[derive(Debug, PartialEq, Clone, Copy)]
@@ -31,7 +39,6 @@ pub fn tokenize(text: String) -> Vec<Token> {
         match ch {
             ch if ch.is_whitespace() => {
                 buffer.clear();
-                continue;
             }
             '+' if next.is_none() || next.unwrap().is_whitespace() => {
                 tokens.push(Token::Operation(Op::Add))
@@ -45,20 +52,13 @@ pub fn tokenize(text: String) -> Vec<Token> {
             '/' if next.is_none() || next.unwrap().is_whitespace() => {
                 tokens.push(Token::Operation(Op::Div))
             }
-            '0'..='9' | '.' => match next {
-                None => {
-                    buffer.push(ch);
-                    tokens.push(parse(&buffer));
+            '-' if buffer.is_empty() => buffer.push(ch),
+            '0'..='9' | '.' => {
+                buffer.push(ch);
+                if next.is_none() || next.unwrap().is_whitespace() {
+                    tokens.push(Token::try_from(&buffer).unwrap_or(Token::Unrecognized));
                 }
-                Some(look_ahead) => match look_ahead {
-                    '0'..='9' | '.' => buffer.push(ch),
-                    _ if look_ahead.is_whitespace() => {
-                        buffer.push(ch);
-                        tokens.push(parse(&buffer));
-                    }
-                    _ => (),
-                },
-            },
+            }
             _ => {
                 tokens.push(Token::Unrecognized);
                 skip_to_whitespace = true;
@@ -69,11 +69,27 @@ pub fn tokenize(text: String) -> Vec<Token> {
     tokens
 }
 
-fn parse(chars: &Vec<char>) -> Token {
-    if chars.contains(&'.') {
-        Token::Float(String::from_iter(chars).parse().unwrap())
-    } else {
-        Token::Int(String::from_iter(chars).parse().unwrap())
+impl From<ParseFloatError> for TokenParseError {
+    fn from(_value: ParseFloatError) -> Self {
+        TokenParseError::ParseFloatError
+    }
+}
+
+impl From<ParseIntError> for TokenParseError {
+    fn from(_value: ParseIntError) -> Self {
+        TokenParseError::IntParseError
+    }
+}
+
+impl TryFrom<&Vec<char>> for Token {
+    type Error = TokenParseError;
+
+    fn try_from(value: &Vec<char>) -> Result<Self, Self::Error> {
+        if value.contains(&'.') {
+            Ok(Token::Float(String::from_iter(value).parse()?))
+        } else {
+            Ok(Token::Int(String::from_iter(value).parse()?))
+        }
     }
 }
 
@@ -85,8 +101,12 @@ mod test {
     fn test_tokenize() {
         assert_eq!(tokenize("2".into()), vec![Token::Int(2)]);
         assert_eq!(tokenize("22".into()), vec![Token::Int(22)]);
+        assert_eq!(tokenize("-2".into()), vec![Token::Int(-2)]);
 
         assert_eq!(tokenize("f".into()), vec![Token::Unrecognized]);
+        assert_eq!(tokenize("3-2".into()), vec![Token::Unrecognized]);
+        assert_eq!(tokenize("3-2.3".into()), vec![Token::Unrecognized]);
+        assert_eq!(tokenize("3.0-2".into()), vec![Token::Unrecognized]);
         assert_eq!(
             tokenize("22 asdf *(".into()),
             vec![Token::Int(22), Token::Unrecognized, Token::Unrecognized]
@@ -103,6 +123,9 @@ mod test {
         assert_eq!(tokenize("1.4".into()), vec![Token::Float(1.4)]);
         assert_eq!(tokenize("10.".into()), vec![Token::Float(10.0)]);
         assert_eq!(tokenize("10.5".into()), vec![Token::Float(10.5)]);
+        assert_eq!(tokenize("-1.4".into()), vec![Token::Float(-1.4)]);
+        assert_eq!(tokenize("-10.".into()), vec![Token::Float(-10.0)]);
+        assert_eq!(tokenize("-10.5".into()), vec![Token::Float(-10.5)]);
 
         assert_eq!(
             tokenize("10.5 4".into()),

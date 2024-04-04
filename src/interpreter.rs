@@ -139,6 +139,22 @@ mod test {
         );
         assert_eq!(
             eval(&Expr::Calc(
+                Op::Add,
+                Box::new(Expr::Literal(Token::Int(-1))),
+                Box::new(Expr::Literal(Token::Int(-11))),
+            )),
+            Ok(Number::Int(-12))
+        );
+        assert_eq!(
+            eval(&Expr::Calc(
+                Op::Add,
+                Box::new(Expr::Literal(Token::Int(-1))),
+                Box::new(Expr::Literal(Token::Int(11))),
+            )),
+            Ok(Number::Int(10))
+        );
+        assert_eq!(
+            eval(&Expr::Calc(
                 Op::Sub,
                 Box::new(Expr::Literal(Token::Int(1))),
                 Box::new(Expr::Literal(Token::Int(1))),
