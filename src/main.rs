@@ -1,4 +1,6 @@
-use std::io::{self, Write};
+use atty;
+use interpreter::{InterpretError, Number};
+use std::io::{self, BufRead, Write};
 
 mod interpreter;
 mod parser;
@@ -10,32 +12,51 @@ fn prompt(input: &mut String) -> io::Result<usize> {
     io::stdin().read_line(input)
 }
 
+fn interpret(text: String) -> Result<Number, InterpretError> {
+    let tokens = tokenizer::tokenize(text);
+    let expr = parser::parse(tokens)?;
+    Ok(interpreter::eval(&expr)?)
+}
+
 fn main() {
     let mut input = String::new();
+
+    if !atty::is(atty::Stream::Stdin) {
+        for line in io::stdin().lock().lines() {
+            let text = match line {
+                Ok(text) => text,
+                Err(e) => {
+                    println!("Could not read line: {}", e);
+                    continue;
+                }
+            };
+            match interpret(text) {
+                Err(InterpretError::ParseError(e)) => {
+                    println!("Could not parse input: {:?}", e);
+                }
+                Err(InterpretError::EvalError(e)) => {
+                    println!("Could not evaluate expression: {:?}", e);
+                }
+                Ok(val) => println!("{}", val),
+            }
+        }
+        return ();
+    }
 
     println!("Reverse polish notation calculator");
     let _ = io::stdout().flush();
     while let Ok(_n) = prompt(&mut input) {
-        let tokens = tokenizer::tokenize(input.clone());
+        let result = interpret(input.clone());
         input.clear();
-        let expr = match parser::parse(tokens) {
-            Ok(expr) => expr,
-            Err(e) => {
+        match result {
+            Err(InterpretError::ParseError(e)) => {
                 println!("Could not parse input: {:?}", e);
-                continue;
             }
-        };
-
-        let result = match interpreter::eval(&expr) {
-            Err(e) => {
+            Err(InterpretError::EvalError(e)) => {
                 println!("Could not evaluate expression: {:?}", e);
-                println!("{:#?}", expr);
-                continue;
             }
-            Ok(number) => number,
+            Ok(val) => println!("= {}", val),
         };
-
-        println!("{}", result);
         let _ = io::stdout().flush();
     }
 }

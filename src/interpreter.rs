@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-use crate::parser::Expr;
+use crate::parser::{Expr, ParserError};
 use crate::tokenizer::{Op, Token};
 
 #[derive(Debug, PartialEq)]
@@ -12,6 +12,23 @@ pub enum EvalError {
 pub enum Number {
     Float(f32),
     Int(i32),
+}
+
+pub enum InterpretError {
+    EvalError(EvalError),
+    ParseError(ParserError),
+}
+
+impl From<EvalError> for InterpretError {
+    fn from(value: EvalError) -> Self {
+        InterpretError::EvalError(value)
+    }
+}
+
+impl From<ParserError> for InterpretError {
+    fn from(value: ParserError) -> Self {
+        InterpretError::ParseError(value)
+    }
 }
 
 impl Number {
