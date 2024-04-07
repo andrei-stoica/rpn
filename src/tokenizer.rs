@@ -40,16 +40,16 @@ pub fn tokenize(text: String) -> Vec<Token> {
             ch if ch.is_whitespace() => {
                 buffer.clear();
             }
-            '+' if next.is_none() || next.unwrap().is_whitespace() => {
+            '+' if buffer.is_empty() && (next.is_none() || next.unwrap().is_whitespace()) => {
                 tokens.push(Token::Operation(Op::Add))
             }
-            '-' if next.is_none() || next.unwrap().is_whitespace() => {
+            '-' if buffer.is_empty() && (next.is_none() || next.unwrap().is_whitespace()) => {
                 tokens.push(Token::Operation(Op::Sub))
             }
-            '*' if next.is_none() || next.unwrap().is_whitespace() => {
+            '*' if buffer.is_empty() && (next.is_none() || next.unwrap().is_whitespace()) => {
                 tokens.push(Token::Operation(Op::Mult))
             }
-            '/' if next.is_none() || next.unwrap().is_whitespace() => {
+            '/' if buffer.is_empty() && (next.is_none() || next.unwrap().is_whitespace()) => {
                 tokens.push(Token::Operation(Op::Div))
             }
             '-' if buffer.is_empty() => buffer.push(ch),
@@ -104,6 +104,17 @@ mod test {
         assert_eq!(tokenize("-2".into()), vec![Token::Int(-2)]);
 
         assert_eq!(tokenize("f".into()), vec![Token::Unrecognized]);
+        assert_eq!(tokenize("3-".into()), vec![Token::Unrecognized]);
+        assert_eq!(tokenize("3+".into()), vec![Token::Unrecognized]);
+        assert_eq!(tokenize("3*".into()), vec![Token::Unrecognized]);
+        assert_eq!(tokenize("3/".into()), vec![Token::Unrecognized]);
+        assert_eq!(tokenize("+3".into()), vec![Token::Unrecognized]);
+        assert_eq!(tokenize("*3".into()), vec![Token::Unrecognized]);
+        assert_eq!(tokenize("/3".into()), vec![Token::Unrecognized]);
+        assert_eq!(tokenize("-3+".into()), vec![Token::Unrecognized]);
+        assert_eq!(tokenize("+3-".into()), vec![Token::Unrecognized]);
+        assert_eq!(tokenize("*3/".into()), vec![Token::Unrecognized]);
+        assert_eq!(tokenize("/3*".into()), vec![Token::Unrecognized]);
         assert_eq!(tokenize("3-2".into()), vec![Token::Unrecognized]);
         assert_eq!(tokenize("3-2.3".into()), vec![Token::Unrecognized]);
         assert_eq!(tokenize("3.0-2".into()), vec![Token::Unrecognized]);
